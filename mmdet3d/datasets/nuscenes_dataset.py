@@ -148,7 +148,7 @@ class NuScenesDataset(Custom3DDataset):
                  use_valid_flag=False,
                  img_info_prototype='mmcv',
                  multi_adj_frame_id_cfg=None,
-                 occupancy_path='/mount/dnn_data/occupancy_2023/gts',
+                 occupancy_path='/home/hunter/extra/datasets/mini/v1.0-mini/gts/',
                  ego_cam='CAM_FRONT',
                  # SOLLOFusion
                  use_sequence_group_flag=False,

@@ -3,12 +3,13 @@ import argparse
 import os 
 import sys
 import nunmpy as np
+from datetime import datetime
 
 def parse_args():
     parser = argparse.ArgumentParser(
         description='eval occupancy')
     parser.add_argument('pred_path', help='pred_path')
-    parser.add_argument('--gt', default='/mount/data/occupancy_cvpr2023/gts', help='checkpoint file')
+    parser.add_argument('--gt', default='/home/hunter/extra/datasets/mini/v1.0-mini/gts', help='checkpoint file')
     parser.add_argument(
         '--eval_fscore',
         action='store_true',
@@ -32,6 +33,8 @@ def eval(args):
                 use_lidar_mask=False,
                 use_image_mask=True,)
     for pred_path in os.listdir(args.pred_path):
+
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
         occ_pred = np.load(os.path.join(args.pred_path, pred_path))['pred']
         occ_gt = np.load(os.path.join(args.gt_path, pred_path.split('.')[0], 'labels.npz'))
         gt_semantics = occ_gt['semantics']

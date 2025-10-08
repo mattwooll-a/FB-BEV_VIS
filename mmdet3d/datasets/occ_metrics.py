@@ -288,6 +288,8 @@ import sys
 import numpy as np
 from tqdm import tqdm
 import time
+from datetime import datetime
+
 def parse_args():
     parser = argparse.ArgumentParser(
         description='eval occupancy')
