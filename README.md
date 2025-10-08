@@ -27,6 +27,12 @@ FB-BEV and FB-OCC are a family of vision-centric 3D object detection and occupan
 
 * More model weights will be released later.
 
+
+
+## Changes
+I've mainly just change the file output and added a vis tool script, make sure to run the test first to create the data (also change the .py config to point to your nuscenes data) then run  python tools/analysis_tools/vis_occupancy_pred.py "YOUR DATA HERE ie /home/user/FB-BEV_VIS/test/fbocc-r50-cbgs_depth_16f_16x4_20e/Wed_Oct__8_14_25/occupancy_pred"  --output occupancy_sequence.mp4     --fps 10
+
+
 ## License
 
 Copyright © 2022 - 2023, NVIDIA Corporation. All rights reserved.
