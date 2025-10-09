@@ -43,7 +43,7 @@ def create_nuscenes_infos(root_path,
     from nuscenes.nuscenes import NuScenes
     nusc = NuScenes(version=version, dataroot=root_path, verbose=True)
     from nuscenes.utils import splits
-    available_vers = ['v1.0-trainval', 'v1.0-test', 'v1.0-mini']
+    available_vers = ['v1.0-trainval', 'v1.0-test', 'v1.0-mini', 'v1.0-mini-dark']
     assert version in available_vers
     if version == 'v1.0-trainval':
         train_scenes = splits.train
@@ -52,6 +52,9 @@ def create_nuscenes_infos(root_path,
         train_scenes = splits.test
         val_scenes = []
     elif version == 'v1.0-mini':
+        train_scenes = splits.mini_train
+        val_scenes = splits.mini_val
+    elif version == 'v1.0-mini-dark':
         train_scenes = splits.mini_train
         val_scenes = splits.mini_val
     else:
