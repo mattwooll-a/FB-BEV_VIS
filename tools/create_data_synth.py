@@ -102,9 +102,11 @@ def nuscenes_data_prep(root_path, info_prefix, version, max_sweeps=10):
 
 
 def add_ann_adj_info(extra_tag, with_lidar_seg=False):
-    nuscenes_version = VERSION
-    dataroot = f'./data/{NUSCENES}/'
+    nuscenes_version = 'v1.0-synthetic'
+    dataroot = f'./data/SyntheticNuScenes/'
+    print(NUSCENES)
     nuscenes = NuScenes(nuscenes_version, dataroot)
+    print("done")
 
     # for set in ['test']:
     #     dataset = pickle.load(
@@ -144,7 +146,9 @@ def add_ann_adj_info(extra_tag, with_lidar_seg=False):
 
     for set in ['train', 'val']:
         dataset = pickle.load(
-            open('./data/%s/%s_infos_%s.pkl' % (NUSCENES, extra_tag, set), 'rb'))
+            open('./data/SyntheticNuScenes/%s_infos_%s.pkl' % ( extra_tag, set), 'rb'))
+        print('./data/SyntheticNuScenes/%s_infos_%s.pkl' % ( extra_tag, set))
+        print('---------------')
         for id in range(len(dataset['infos'])):
             if id % 10 == 0:
                 print('%d/%d' % (id, len(dataset['infos'])))
@@ -166,10 +170,6 @@ def add_ann_adj_info(extra_tag, with_lidar_seg=False):
             dataset['infos'][id]['scene_name'] = scene['name']
             dataset['infos'][id]['prev'] = sample['prev']
             # description = scene['description']
-            if with_lidar_seg:
-                lidar_sd_token = sample['data']['LIDAR_TOP']
-                dataset['infos'][id]['lidarseg_filename'] =  nuscenes.get('lidarseg', lidar_sd_token)['filename']
-
 
             scene = nuscenes.get('scene', sample['scene_token'])
             dataset['infos'][id]['occ_path'] = \
@@ -180,10 +180,11 @@ def add_ann_adj_info(extra_tag, with_lidar_seg=False):
 
 
 if __name__ == '__main__':
-    dataset = 'nuscenes'
-    version = 'v1.0'
-    train_version = VERSION
-    root_path = f'./data/{NUSCENES}'
+    dataset = 'SyntheticNuScenes'
+    version = 'v1.0-synthetic'
+    train_version = version
+    #NuScenes(version='v1.0-synthetic', dataroot='/home/hunter/extra/AGX/FB-BEV_VIS/data/SyntheticNuScenes')
+    root_path = f'./data/SyntheticNuScenes'
     extra_tag = 'bevdetv2-nuscenes'
     nuscenes_data_prep(
         root_path=root_path,

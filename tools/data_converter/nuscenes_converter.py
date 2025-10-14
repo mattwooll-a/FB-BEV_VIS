@@ -41,9 +41,11 @@ def create_nuscenes_infos(root_path,
             Default: 10.
     """
     from nuscenes.nuscenes import NuScenes
+    print(version)
+    print(root_path)
     nusc = NuScenes(version=version, dataroot=root_path, verbose=True)
     from nuscenes.utils import splits
-    available_vers = ['v1.0-trainval', 'v1.0-test', 'v1.0-mini', 'v1.0-mini-dark']
+    available_vers = ['v1.0-trainval', 'v1.0-test', 'v1.0-mini', 'v1.0-synthetic']
     assert version in available_vers
     if version == 'v1.0-trainval':
         train_scenes = splits.train
@@ -57,6 +59,11 @@ def create_nuscenes_infos(root_path,
     elif version == 'v1.0-mini-dark':
         train_scenes = splits.mini_train
         val_scenes = splits.mini_val
+    elif version == 'v1.0-synthetic':
+        all_scenes = [scene['name'] for scene in nusc.scene]
+        train_scenes = all_scenes
+        val_scenes = all_scenes
+        print(f"Using {len(all_scenes)} synthetic scenes for both train and val")
     else:
         raise ValueError('unknown')
 

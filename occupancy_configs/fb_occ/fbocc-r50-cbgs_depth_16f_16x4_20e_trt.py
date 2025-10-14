@@ -251,7 +251,7 @@ model = dict(
 
 # Data
 dataset_type = 'NuScenesDataset'
-data_root = 'data/nuscenes/'
+data_root = 'data/nuscenes/v-1'
 file_client_args = dict(backend='disk')
 occupancy_path = 'data/nuscenes/gts'
 
@@ -326,7 +326,7 @@ share_data_config = dict(
 test_data_config = dict(
     pipeline=test_pipeline,
     sequences_split_num=test_sequences_split_num,
-    ann_file=data_root + 'bevdetv2-nuscenes_infos_val.pkl')
+    ann_file=data_root + 'bevdetv2-nuscenes-dark_infos_val.pkl')
 
 data = dict(
     samples_per_gpu=samples_per_gpu,
@@ -335,7 +335,7 @@ data = dict(
     train=dict(
         type=dataset_type,
         data_root=data_root,
-        ann_file=data_root + 'bevdetv2-nuscenes_infos_train.pkl',
+        ann_file=data_root + 'bevdetv2-nuscenes-dark_infos_train.pkl',
         classes=class_names,
         test_mode=False,
         use_valid_flag=True,

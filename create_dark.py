@@ -1,6 +1,7 @@
-# Copyright (c) OpenMMLab. All rights reserved.
-import pickle
+# Updated create_data.py script for dark dataset
+# Add this at the top of your create_data.py file or modify accordingly
 
+import pickle
 import numpy as np
 from nuscenes import NuScenes
 from nuscenes.utils.data_classes import Box
@@ -33,32 +34,25 @@ map_name_from_general_to_detection = {
     'movable_object.debris': 'ignore',
     'static_object.bicycle_rack': 'ignore',
 }
+
 classes = [
     'car', 'truck', 'construction_vehicle', 'bus', 'trailer', 'barrier',
     'motorcycle', 'bicycle', 'pedestrian', 'traffic_cone'
 ]
 
-VERSION= 'v1.0-trainval'
+# CHANGE THIS to use the dark version
+VERSION = 'v1.0-mini-dark'
 NUSCENES = 'nuscenes'
+
 def get_gt(info):
-    """Generate gt labels from info.
-
-    Args:
-        info(dict): Infos needed to generate gt labels.
-
-    Returns:
-        Tensor: GT bboxes.
-        Tensor: GT labels.
-    """
+    """Generate gt labels from info."""
     ego2global_rotation = info['cams']['CAM_FRONT']['ego2global_rotation']
-    ego2global_translation = info['cams']['CAM_FRONT'][
-        'ego2global_translation']
+    ego2global_translation = info['cams']['CAM_FRONT']['ego2global_translation']
     trans = -np.array(ego2global_translation)
     rot = Quaternion(ego2global_rotation).inverse
     gt_boxes = list()
     gt_labels = list()
     for ann_info in info['ann_infos']:
-        # Use ego coordinate.
         if (map_name_from_general_to_detection[ann_info['category_name']]
                 not in classes
                 or ann_info['num_lidar_pts'] + ann_info['num_radar_pts'] <= 0):
@@ -84,63 +78,15 @@ def get_gt(info):
 
 
 def nuscenes_data_prep(root_path, info_prefix, version, max_sweeps=10):
-    """Prepare data related to nuScenes dataset.
-
-    Related data consists of '.pkl' files recording basic infos,
-    2D annotations and groundtruth database.
-
-    Args:
-        root_path (str): Path of dataset root.
-        info_prefix (str): The prefix of info filenames.
-        version (str): Dataset version.
-        max_sweeps (int, optional): Number of input consecutive frames.
-            Default: 10
-    """
+    """Prepare data related to nuScenes dataset."""
     nuscenes_converter.create_nuscenes_infos(
         root_path, info_prefix, version=version, max_sweeps=max_sweeps)
-
 
 
 def add_ann_adj_info(extra_tag, with_lidar_seg=False):
     nuscenes_version = VERSION
     dataroot = f'./data/{NUSCENES}/'
     nuscenes = NuScenes(nuscenes_version, dataroot)
-
-    # for set in ['test']:
-    #     dataset = pickle.load(
-    #         open('./data/%s/%s_infos_%s.pkl' % (NUSCENES, extra_tag, set), 'rb'))
-    #     for id in range(len(dataset['infos'])):
-    #         if id % 10 == 0:
-    #             print('%d/%d' % (id, len(dataset['infos'])))
-    #         info = dataset['infos'][id]
-    #         # get sweep adjacent frame info
-    #         sample = nuscenes.get('sample', info['token'])
-    #         ann_infos = list()
-    #         for ann in sample['anns']:
-    #             ann_info = nuscenes.get('sample_annotation', ann)
-    #             velocity = nuscenes.box_velocity(ann_info['token'])
-    #             if np.any(np.isnan(velocity)):
-    #                 velocity = np.zeros(3)
-    #             ann_info['velocity'] = velocity
-    #             ann_infos.append(ann_info)
-    #         dataset['infos'][id]['ann_infos'] = ann_infos
-    #         dataset['infos'][id]['ann_infos'] = get_gt(dataset['infos'][id])
-    #         dataset['infos'][id]['scene_token'] = sample['scene_token']
-    #         scene = nuscenes.get('scene',  sample['scene_token'])
-    #         dataset['infos'][id]['scene_name'] = scene['name']
-    #         dataset['infos'][id]['prev'] = sample['prev']
-    #         # description = scene['description']
-    #         if with_lidar_seg:
-    #             lidar_sd_token = sample['data']['LIDAR_TOP']
-    #             dataset['infos'][id]['lidarseg_filename'] =  nuscenes.get('lidarseg', lidar_sd_token)['filename']
-
-
-    #         scene = nuscenes.get('scene', sample['scene_token'])
-    #         dataset['infos'][id]['occ_path'] = \
-    #             './data/nuscenes/gts/%s/%s'%(scene['name'], info['token'])
-    #     with open('./data/%s/%s_infos_%s.pkl' % (NUSCENES, extra_tag, set),
-    #               'wb') as fid:
-    #         pickle.dump(dataset, fid)
 
     for set in ['train', 'val']:
         dataset = pickle.load(
@@ -165,15 +111,22 @@ def add_ann_adj_info(extra_tag, with_lidar_seg=False):
             scene = nuscenes.get('scene',  sample['scene_token'])
             dataset['infos'][id]['scene_name'] = scene['name']
             dataset['infos'][id]['prev'] = sample['prev']
-            # description = scene['description']
+            
             if with_lidar_seg:
                 lidar_sd_token = sample['data']['LIDAR_TOP']
-                dataset['infos'][id]['lidarseg_filename'] =  nuscenes.get('lidarseg', lidar_sd_token)['filename']
-
+                dataset['infos'][id]['lidarseg_filename'] = nuscenes.get('lidarseg', lidar_sd_token)['filename']
 
             scene = nuscenes.get('scene', sample['scene_token'])
+            
+            # IMPORTANT: Update occ_path to use dark version if needed
+            # Option 1: Use same gts as original
             dataset['infos'][id]['occ_path'] = \
-                './data/nuscenes/gts/%s/%s'%(scene['name'], info['token'])
+                './data/nuscenes/mini/v1.0-mini-dark/gts/%s/%s' % (scene['name'], info['token'])
+            
+            # Option 2: Use separate dark gts (if you created them)
+            # dataset['infos'][id]['occ_path'] = \
+            #     './data/nuscenes/gts_dark/%s/%s' % (scene['name'], info['token'])
+            
         with open('./data/%s/%s_infos_%s.pkl' % (NUSCENES, extra_tag, set),
                   'wb') as fid:
             pickle.dump(dataset, fid)
@@ -182,9 +135,15 @@ def add_ann_adj_info(extra_tag, with_lidar_seg=False):
 if __name__ == '__main__':
     dataset = 'nuscenes'
     version = 'v1.0'
-    train_version = VERSION
+    train_version = VERSION  # 'v1.0-mini-dark'
     root_path = f'./data/{NUSCENES}'
-    extra_tag = 'bevdetv2-nuscenes'
+    
+    # CHANGE THIS to create dark-specific pickle files
+    extra_tag = 'bevdetv2-nuscenes-dark'
+    
+    print(f"Creating dataset info for {train_version}")
+    print(f"Output prefix: {extra_tag}")
+    
     nuscenes_data_prep(
         root_path=root_path,
         info_prefix=extra_tag,
@@ -193,3 +152,11 @@ if __name__ == '__main__':
 
     print('add_ann_infos')
     add_ann_adj_info(extra_tag)
+    
+    print("\n" + "="*60)
+    print("✓ Dark dataset info files created!")
+    print(f"  Files: {extra_tag}_infos_train.pkl")
+    print(f"         {extra_tag}_infos_val.pkl")
+    print("\nNext steps:")
+    print("1. Update your config file with the changes shown above")
+    print("2. Run training/testing with the updated config")
