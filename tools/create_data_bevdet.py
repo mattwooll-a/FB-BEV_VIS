@@ -181,7 +181,7 @@ def add_ann_adj_info(extra_tag, with_lidar_seg=False):
 
 if __name__ == '__main__':
     dataset = 'nuscenes'
-    version = 'v1.0'
+    version = 'v1.0-mini'
     train_version = VERSION
     root_path = f'./data/{NUSCENES}'
     extra_tag = 'bevdetv2-nuscenes'
