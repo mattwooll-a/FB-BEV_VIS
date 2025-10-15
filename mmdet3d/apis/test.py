@@ -35,7 +35,11 @@ def single_gpu_test(model,
     results = []
     dataset = data_loader.dataset
     prog_bar = mmcv.ProgressBar(len(dataset))
+    print("single_test")
     for i, data in enumerate(data_loader):
+        print(f"Dataset length: {len(dataset)}")
+        print(f"DataLoader length: {len(data_loader)}")
+        print(f"First 5 sample indices: {[dataset.data_infos[i]['token'] if i < len(dataset.data_infos) else 'N/A' for i in range(min(5, len(dataset)))]}")
         with torch.no_grad():
             result = model(return_loss=False, rescale=True, **data)
 

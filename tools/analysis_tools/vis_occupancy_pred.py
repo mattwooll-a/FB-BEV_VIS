@@ -384,7 +384,7 @@ def main():
     
     args = parser.parse_args()
 
-    z_layers = [10,11,12,13,14,15,16,17,18]
+    z_layers = [10,11]
     if args.z_layers:
         z_layers = [int(x.strip()) for x in args.z_layers.split(',')]
     

@@ -180,6 +180,7 @@ class LoadOccupancy(object):
         """
 
         scene_name = results['curr']['scene_name']
+        ##scene_name = scene_name = 'unknown'
         sample_token = results['curr']['token']
 
 
@@ -1372,7 +1373,20 @@ class LoadAnnotationsBEVDepth(object):
         return gt_boxes, rot_mat
 
     def __call__(self, results):
-        gt_boxes, gt_labels = results['ann_infos']
+        #gt_boxes, gt_labels = results['ann_infos']
+
+    # Original line 1375
+        # gt_boxes, gt_labels = results['ann_infos']
+
+        # Replace with:
+        if 'ann_infos' in results:
+            gt_boxes, gt_labels = results['ann_infos']
+        else:
+            # No annotations available (e.g., synthetic test data)
+            gt_boxes = torch.zeros(0, 9)
+            gt_labels = torch.zeros(0, 9)
+            print("AHHHHHHHHHHH replace ann labels")
+
         gt_boxes, gt_labels = torch.Tensor(np.array(gt_boxes)), torch.tensor(np.array(gt_labels))
         tta_confg = results.get('tta_config', None)
         rotate_bda, scale_bda, flip_dx, flip_dy = self.sample_bda_augmentation(tta_confg

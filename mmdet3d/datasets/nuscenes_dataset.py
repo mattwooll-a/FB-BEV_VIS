@@ -296,12 +296,21 @@ class NuScenesDataset(Custom3DDataset):
         """
         info = self.data_infos[index]
         # standard protocol modified from SECOND.Pytorch
+        scene_name = info.get('scene_name', None)
+        if scene_name is None:
+            # Fallback: get scene name from nusc object
+            scene_token = info.get('scene_token', None)
+            if scene_token:
+                scene_rec = self.nusc.get('scene', scene_token)
+                scene_name = scene_rec['name']
+            else:
+                scene_name = "synthetic-scene-01"
         input_dict = dict(
             index=index,
             sample_idx=info['token'],
             pts_filename=info['lidar_path'],
             sweeps=info['sweeps'],
-            scene_name=info['scene_name'],
+            scene_name=scene_name,
             timestamp=info['timestamp'] / 1e6,
             lidarseg_filename=info.get('lidarseg_filename', 'None') 
         )

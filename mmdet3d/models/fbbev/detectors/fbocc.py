@@ -319,6 +319,10 @@ class FBOCC(CenterPoint):
 
         context = self.image_encoder(img[0])
         cam_params = img[1:7]
+        print(f"DEBUG cam_params lengths: {[x.shape if hasattr(x, 'shape') else len(x) for x in cam_params]}")
+
+        
+        mlp_input = self.depth_net.get_mlp_input(*cam_params)
         if self.with_specific_component('depth_net'):
             mlp_input = self.depth_net.get_mlp_input(*cam_params)
             context, depth = self.depth_net(context, mlp_input)
@@ -483,12 +487,26 @@ class FBOCC(CenterPoint):
                 raise ValueError(
                     'num of augmentations ({}) != num of image meta ({})'.format(
                         len(img_inputs), len(img_metas)))
+            
 
-            if num_augs==1 and not img_metas[0].data[0][0].get('tta_config', dict(dist_tta=False))['dist_tta']:
-                # return self.simple_test(points[0], img_metas[0], img_inputs[0],
-                #                     **kwargs)
-                return self.simple_test(points[0], img_metas[0].data[0], img_inputs[0],
-                                    **kwargs)
+            
+
+                        # Handle both DataContainer and plain list formats
+            if hasattr(img_metas[0], 'data'):
+                # DataContainer wrapped format (normal case)
+                meta_dict = img_metas[0].data[0][0]
+            else:
+                # Plain list format (some test cases)
+                if isinstance(img_metas[0], list):
+                    meta_dict = img_metas[0][0] if isinstance(img_metas[0][0], dict) else {}
+                else:
+                    meta_dict = img_metas[0] if isinstance(img_metas[0], dict) else {}
+
+            if num_augs==1 and not meta_dict.get('tta_config', dict(dist_tta=False))['dist_tta']:
+                 return self.simple_test(points[0], img_metas[0], img_inputs[0],
+                                     **kwargs)
+                ##return self.simple_test(points[0], img_metas[0].data[0], img_inputs[0],
+                #                    **kwargs)
             else:
                 return self.aug_test(points, img_metas, img_inputs, **kwargs)
         
@@ -516,6 +534,7 @@ class FBOCC(CenterPoint):
                     return_raw_occ=False,
                     **kwargs):
         """Test function without augmentaiton."""
+        
         results = self.extract_feat(
             points, img=img, img_metas=img_metas, **kwargs)
         

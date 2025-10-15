@@ -73,6 +73,7 @@ def parse_args():
     parser.add_argument(
         '--save',
         action='store_true',
+        default = True,
         help='save occupancy_data')
     parser.add_argument('--show', action='store_true', help='show results')
     parser.add_argument(
@@ -193,7 +194,7 @@ def main():
 
 
     test_dataloader_default_args = dict(
-        samples_per_gpu=1, workers_per_gpu=2, dist=distributed, shuffle=False)
+        samples_per_gpu=1, workers_per_gpu=1, dist=distributed, shuffle=False)
 
     # in case the test dataset is concatenated
     if isinstance(cfg.data.test, dict):
@@ -221,10 +222,20 @@ def main():
     # build the dataloader
     print(test_loader_cfg)
     dataset = build_dataset(cfg.data.test)
-    
-    
-    
-    data_loader = build_dataloader(dataset, **test_loader_cfg)
+
+    if len(dataset) < test_loader_cfg.get('samples_per_gpu', 1):
+        print(f"⚠️ Dataset too small ({len(dataset)} samples), using standard DataLoader")
+        from torch.utils.data import DataLoader
+        data_loader = DataLoader(
+            dataset,
+            batch_size=1,
+            num_workers=test_loader_cfg.get('workers_per_gpu', 0),
+            shuffle=False,
+            drop_last=False
+        )
+    else:
+        # Use the custom build_dataloader
+        data_loader = build_dataloader(dataset, **test_loader_cfg)
 
     # build the model and load checkpoint
     if not args.no_aavt:
@@ -277,7 +288,26 @@ def main():
 
     rank, _ = get_dist_info()
 
-    
+        # After the test loop completes
+    print("\n" + "="*60)
+    print("🔍 DEBUGGING TEST RESULTS")
+    print("="*60)
+    print(f"Number of outputs: {len(outputs)}")
+    print(f"Dataset length: {len(dataset)}")
+
+    if len(outputs) > 0:
+        print(f"First output type: {type(outputs[0])}")
+        print(f"First output keys: {outputs[0].keys() if isinstance(outputs[0], dict) else 'not a dict'}")
+    else:
+        print("⚠️ WARNING: No outputs generated!")
+        print("Checking dataset...")
+        print(f"  - Dataset has {len(dataset)} samples")
+        if len(dataset) > 0:
+            print(f"  - First sample keys: {list(dataset[0].keys())}")
+    print("="*60 + "\n")
+
+    # Then evaluate
+
     if rank == 0:
         if args.out:
             print(f'\nwriting results to {args.out}')

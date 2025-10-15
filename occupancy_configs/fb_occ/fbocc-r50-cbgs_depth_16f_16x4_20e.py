@@ -251,9 +251,9 @@ model = dict(
 
 # Data
 dataset_type = 'NuScenesDataset'
-data_root = 'data/nuscenes/'
+data_root = './data/nuscenes-mini/'
 file_client_args = dict(backend='disk')
-occupancy_path = '/home/hunter/extra/datasets/mini/v1.0-mini/gts/'
+occupancy_path = './data/nuscenes-mini/gts/'
 
 
 train_pipeline = [
@@ -327,7 +327,7 @@ share_data_config = dict(
 test_data_config = dict(
     pipeline=test_pipeline,
     sequences_split_num=test_sequences_split_num,
-    ann_file=data_root + 'bevdetv2-nuscenes_infos_val.pkl')
+    ann_file=data_root + 'bevdetv2-nuscenes_infos_val.pkl') ####change when not
 
 data = dict(
     samples_per_gpu=samples_per_gpu,
